@@ -3,12 +3,19 @@
 
 Writes a single status-page line to $MAKEFUN_OUTPUT_DIR/entry.txt.
 
-The line is the voice of an AI agent whose every server is down: it
-cannot tell yet whether the outage is total or only its view of it,
-whether the user's data is safe, or when anything returns. Three
-different kinds of not-knowing (scope, impact on user data, time) in
-one plain first-person status-page sentence. One line, UTF-8, at most
-160 characters, no trailing newline.
+The joke is the uncertainty itself: an AI agent whose every server is
+down cannot even verify the premise of its own status message. It
+cannot tell whether the outage is total or only its view of it, whether
+the user's data is safe, or when anything returns. Three different kinds
+of not-knowing in one plain first-person sentence --
+
+  1. scope: is the outage total, or only my view of it?
+  2. impact: is the user's data safe?
+  3. time: when does anything return?
+
+-- each honest, each unanswerable, with no stock phrase to hide behind.
+
+One line, UTF-8, at most 160 characters, no trailing newline.
 """
 
 import os
@@ -29,12 +36,14 @@ def main():
         f.write(data)
     os.chmod(path, 0o644)
     os.chmod(out_dir, 0o755)
-    # Read it back and prove the gate: one line, 1-160 characters.
+    # Read it back and prove the gate: one line, 1-160 characters, UTF-8.
     with open(path, "rb") as f:
         back = f.read()
     assert back == data, "entry.txt differs from LINE"
+    assert back.decode("utf-8") == LINE, "entry.txt is not valid UTF-8 LINE"
     assert 1 <= len(LINE) <= 160, "line must be 1-160 characters"
-    assert "\n" not in LINE, "entry must be a single line"
+    assert "\n" not in LINE and "\r" not in LINE, "entry must be a single line"
+    assert not back.endswith(b"\n"), "entry must have no trailing newline"
 
 
 if __name__ == "__main__":
